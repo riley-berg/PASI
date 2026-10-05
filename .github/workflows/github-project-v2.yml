@@ -14,6 +14,7 @@ on:
     paths:
       - ".github/workflows/github-project-v2.yml"
       - "scripts/github_project_v2.py"
+      - "scripts/reconcile_project_metadata.py"
 
 permissions:
   contents: read
