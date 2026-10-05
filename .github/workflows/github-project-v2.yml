@@ -91,6 +91,8 @@ jobs:
             exit 1
           fi
 
+          echo "::notice title=Manual Roadmap date-field verification required::GitHub's Projects API cannot inspect the Roadmap Date fields picker. In Project #5 -> PASI Roadmap -> Date fields, verify Start date = Start date and Target date = Target date."
+
           python scripts/validate_project5_roadmap.py
 
       - name: Verify dry-run configuration
