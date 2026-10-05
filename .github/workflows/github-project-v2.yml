@@ -74,6 +74,19 @@ jobs:
 
           python scripts/reconcile_project_metadata.py
 
+      - name: Validate Project #5 roadmap contract
+        env:
+          PASI_PROJECTS_TOKEN: ${{ secrets.PASI_PROJECTS_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${PASI_PROJECTS_TOKEN}" ]]; then
+            echo "::error::Repository secret PASI_PROJECTS_TOKEN is required."
+            exit 1
+          fi
+
+          python scripts/validate_project5_roadmap.py
+
       - name: Verify dry-run configuration
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         env:
