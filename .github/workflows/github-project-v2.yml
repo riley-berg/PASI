@@ -15,6 +15,7 @@ on:
       - ".github/workflows/github-project-v2.yml"
       - "scripts/github_project_v2.py"
       - "scripts/reconcile_project_metadata.py"
+      - "scripts/validate_project5_roadmap.py"
 
 permissions:
   contents: read
@@ -74,7 +75,12 @@ jobs:
 
           python scripts/reconcile_project_metadata.py
 
-      - name: Validate Project #5 roadmap contract
+      # NOTE: GitHub's documented Projects APIs do not expose the Roadmap view's
+      # Date fields picker mapping. The validator therefore fails closed when
+      # that mapping cannot be inspected, and the mapping must be verified
+      # manually in GitHub: Project #5 -> PASI Roadmap -> Date fields ->
+      # Start date = Start date and Target date = Target date.
+      - name: Validate Project #5 roadmap contract and date-field mapping
         env:
           PASI_PROJECTS_TOKEN: ${{ secrets.PASI_PROJECTS_TOKEN }}
         run: |
