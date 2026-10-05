@@ -42,7 +42,6 @@ jobs:
       - name: Reconcile canonical Project #5
         env:
           PASI_PROJECTS_TOKEN: ${{ secrets.PASI_PROJECTS_TOKEN }}
-          PASI_PROJECT_NUMBER: "5"
         run: |
           set -euo pipefail
 
@@ -51,7 +50,12 @@ jobs:
             exit 1
           fi
 
-          python scripts/github_project_v2.py --project-number 5
+          args=(python scripts/github_project_v2.py --project-number 5)
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.dry_run }}" == "true" ]]; then
+            args+=(--dry-run)
+          fi
+
+          "${args[@]}"
 
       - name: Verify dry-run configuration
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
