@@ -16,7 +16,6 @@ on:
       - "scripts/github_project_v2.py"
       - "scripts/reconcile_project_metadata.py"
       - "scripts/validate_project5_roadmap.py"
-      - "scripts/validate_project5_roadmap_ui.spec.mjs"
 
 permissions:
   contents: read
@@ -77,8 +76,8 @@ jobs:
           python scripts/reconcile_project_metadata.py
 
       # The Projects API exposes the date fields and item values, but not the
-      # Roadmap Date fields picker mapping. The browser check below is therefore
-      # authoritative for Start date = Start date and Target date = Target date.
+      # Roadmap Date fields picker mapping. The dedicated Project #5 Roadmap UI
+      # workflow owns that browser-level contract.
       - name: Validate Project #5 roadmap API contract
         env:
           PASI_PROJECTS_TOKEN: ${{ secrets.PASI_PROJECTS_TOKEN }}
@@ -91,42 +90,6 @@ jobs:
           fi
 
           python scripts/validate_project5_roadmap.py
-
-      - name: Set up Node.js for Roadmap UI check
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-
-      - name: Verify browser-check credentials are configured
-        env:
-          PASI_GITHUB_USERNAME: ${{ secrets.PASI_GITHUB_USERNAME }}
-          PASI_GITHUB_PASSWORD: ${{ secrets.PASI_GITHUB_PASSWORD }}
-          PASI_GITHUB_TOTP_SECRET: ${{ secrets.PASI_GITHUB_TOTP_SECRET }}
-        run: |
-          set -euo pipefail
-
-          if [[ -z "${PASI_GITHUB_USERNAME}" || -z "${PASI_GITHUB_PASSWORD}" ]]; then
-            echo "::error::Repository secrets PASI_GITHUB_USERNAME and PASI_GITHUB_PASSWORD are required for the authenticated Roadmap UI check."
-            exit 1
-          fi
-
-          if [[ -z "${PASI_GITHUB_TOTP_SECRET}" ]]; then
-            echo "::error::Repository secret PASI_GITHUB_TOTP_SECRET is required because the browser check must complete GitHub 2FA non-interactively. Use a dedicated test account with TOTP."
-            exit 1
-          fi
-
-      - name: Install Chromium for Roadmap UI check
-        run: npx --yes playwright@1.63.0 install --with-deps chromium
-
-      - name: Verify Project #5 Roadmap Date fields in GitHub UI
-        env:
-          PASI_GITHUB_USERNAME: ${{ secrets.PASI_GITHUB_USERNAME }}
-          PASI_GITHUB_PASSWORD: ${{ secrets.PASI_GITHUB_PASSWORD }}
-          PASI_GITHUB_TOTP_SECRET: ${{ secrets.PASI_GITHUB_TOTP_SECRET }}
-        run: |
-          set -euo pipefail
-
-          npx --yes playwright@1.63.0 test             scripts/validate_project5_roadmap_ui.spec.mjs             --reporter=line             --workers=1             --retries=0
 
       - name: Verify dry-run configuration
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
