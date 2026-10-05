@@ -170,7 +170,7 @@ query Project($login: String!, $number: Int!, $fieldAfter: String, $itemAfter: S
           }
           ... on ProjectV2SingleSelectField {
             id name dataType
-            options(first: 100) { nodes { id name } }
+            options { id name }
           }
           ... on ProjectV2IterationField {
             id name
@@ -267,7 +267,7 @@ def ensure_field(name: str, datatype: str, *, options: list[str] | None = None) 
         projectV2Field {
           __typename
           ... on ProjectV2Field { id name dataType }
-          ... on ProjectV2SingleSelectField { id name dataType options(first:100) { nodes { id name } } }
+          ... on ProjectV2SingleSelectField { id name dataType options { id name } }
           ... on ProjectV2IterationField { id name configuration { iterations { id title startDate duration } } }
         }
       }
@@ -374,7 +374,7 @@ def ensure_iteration_field(metadata: dict[int, dict[str, str]]) -> dict[str, Any
 
 
 def field_option(field: dict[str, Any], name: str) -> str:
-    for option in ((field.get("options") or {}).get("nodes") or []):
+    for option in (field.get("options") or []):
         if str(option.get("name", "")).casefold() == name.casefold():
             return str(option["id"])
     raise Error(f"option {name!r} missing from field {field.get('name')!r}")
