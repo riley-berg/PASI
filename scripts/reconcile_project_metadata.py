@@ -159,9 +159,10 @@ query Project($login: String!, $number: Int!, $fieldAfter: String, $itemAfter: S
           __typename
           ... on ProjectV2Field {
             id name dataType
-            options(first: 100) {
-              nodes { id name }
-            }
+          }
+          ... on ProjectV2SingleSelectField {
+            id name dataType
+            options(first: 100) { nodes { id name } }
           }
           ... on ProjectV2IterationField {
             id name
@@ -257,7 +258,8 @@ def ensure_field(name: str, datatype: str, *, options: list[str] | None = None) 
       }) {
         projectV2Field {
           __typename
-          ... on ProjectV2Field { id name dataType options(first:100) { nodes { id name } } }
+          ... on ProjectV2Field { id name dataType }
+          ... on ProjectV2SingleSelectField { id name dataType options(first:100) { nodes { id name } } }
           ... on ProjectV2IterationField { id name configuration { iterations { id title startDate duration } } }
         }
       }
