@@ -34,7 +34,7 @@ SINGLE_OPTIONS = {
         "Runtime", "Kernel", "Kernel Migration", "Capability Platform", "Trust",
         "Supervisor", "Agents", "Autonomous Development", "Engineering Data",
         "Verification", "Numerical", "Experiments", "Advanced AI", "Compute",
-        "Workspace", "Collaboration", "Research",
+        "Workspace", "Collaboration", "Research", "Program",
     ],
     "Quarter": ["Q4-2026", "Q1-2027", "Q2-2027", "Q3-2027", "Q4-2027"],
 }
@@ -126,12 +126,22 @@ def issue_metadata() -> dict[int, dict[str, str]]:
     result = {}
     for number in ISSUES:
         item = issue(number)
-        meta = parse_metadata(number, item.get("body") or "")
+        body = item.get("body") or ""
+        if number == 1 and not ISSUE_META.search(body):
+            meta = {
+                "start": "2026-10-05",
+                "end": "2027-11-14",
+                "team": "Program",
+                "quarter": "Q4-2026",
+                "owner": OWNER,
+                "iteration": "Program Roadmap",
+            }
+        else:
+            meta = parse_metadata(number, body)
         if meta["owner"] != OWNER:
             raise Error(f"issue #{number} owner metadata is {meta['owner']!r}")
         result[number] = meta
-        if number != 1:
-            DATE_RANGES[number] = (meta["start"], meta["end"])
+        DATE_RANGES[number] = (meta["start"], meta["end"])
     return result
 
 
@@ -278,7 +288,7 @@ def ensure_iteration_field(metadata: dict[int, dict[str, str]]) -> dict[str, Any
                 for x in ((field.get("configuration") or {}).get("iterations") or [])
             ]
             desired = []
-            for number in range(19, 36):
+            for number in ISSUES:
                 m = metadata[number]
                 start = dt.date.fromisoformat(m["start"])
                 end = dt.date.fromisoformat(m["end"])
@@ -317,7 +327,7 @@ def ensure_iteration_field(metadata: dict[int, dict[str, str]]) -> dict[str, Any
 
     p = project()
     desired = []
-    for number in range(19, 36):
+    for number in ISSUES:
         m = metadata[number]
         start = dt.date.fromisoformat(m["start"])
         end = dt.date.fromisoformat(m["end"])
@@ -500,7 +510,7 @@ def reconcile(metadata: dict[int, dict[str, str]]) -> None:
         if repo == REPO.casefold() and isinstance(n, int):
             items_by_number[n] = item
 
-    for number in range(19, 36):
+    for number in ISSUES:
         item = items_by_number[number]
         m = metadata[number]
         set_project_value(p["meta"]["id"], item["id"], start_field["id"], {"date": m["start"]})
