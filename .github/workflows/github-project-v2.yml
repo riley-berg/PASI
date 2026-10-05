@@ -1,0 +1,69 @@
+name: PASI Project #5 reconciliation
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Preview the reconciliation without changing Project #5"
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/github-project-v2.yml"
+      - "scripts/github_project_v2.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pasi-project-5-reconciliation
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    name: Reconcile Project #5
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out canonical PASI
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Reconcile canonical Project #5
+        env:
+          PASI_PROJECTS_TOKEN: ${{ secrets.PASI_PROJECTS_TOKEN }}
+          PASI_PROJECT_NUMBER: "5"
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${PASI_PROJECTS_TOKEN}" ]]; then
+            echo "::error::Repository secret PASI_PROJECTS_TOKEN is required."
+            exit 1
+          fi
+
+          python scripts/github_project_v2.py --project-number 5
+
+      - name: Verify dry-run configuration
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        env:
+          PASI_PROJECTS_TOKEN: ${{ secrets.PASI_PROJECTS_TOKEN }}
+          PASI_PROJECT_NUMBER: "5"
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${PASI_PROJECTS_TOKEN}" ]]; then
+            echo "::error::Repository secret PASI_PROJECTS_TOKEN is required."
+            exit 1
+          fi
+
+          python scripts/github_project_v2.py --project-number 5 --dry-run
