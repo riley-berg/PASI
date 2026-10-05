@@ -187,17 +187,12 @@ def main() -> int:
     print("DATE fields: Start date [DATE], Target date [DATE]")
     print(f"Canonical items with both dates: {len(canonical_items)}")
 
-    message = (
-        "MANUAL VERIFICATION REQUIRED: GitHub's supported Projects API does not "
-        "expose the Roadmap Date fields picker mapping, so CI cannot verify the "
-        "timeline field selection. Open Project #5 in GitHub, open the PASI "
-        "Roadmap view, choose Date fields, and verify Start date is mapped to "
-        "the Start date field and Target date is mapped to the Target date field. "
-        "This workflow intentionally fails until the mapping can be inspected "
-        "by a supported API or an approved browser verification step."
+    print(
+        "INFO: GitHub's supported Projects API does not expose the Roadmap "
+        "Date fields picker mapping; the browser-based UI contract check must "
+        "verify Start date = Start date and Target date = Target date."
     )
-    print(f"::error title=Roadmap date-field mapping not API-verifiable::{message}")
-    return 1
+    return 0
 
 
 if __name__ == "__main__":
