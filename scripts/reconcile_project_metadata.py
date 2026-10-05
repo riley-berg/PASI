@@ -110,7 +110,7 @@ def issue(number: int) -> dict[str, Any]:
 
 def parse_metadata(number: int, body: str) -> dict[str, str]:
     def value(name: str) -> str:
-        match = re.search(rf"(?m)^\\s*{re.escape(name)}:\\s*(.+?)\\s*$", body)
+        match = re.search(rf"(?m)^\s*{re.escape(name)}:\s*(.+?)\s*$", body)
         if not match:
             raise Error(f"issue #{number} is missing roadmap metadata field {name}")
         return match.group(1).strip()
