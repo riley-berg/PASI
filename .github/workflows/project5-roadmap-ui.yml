@@ -1,0 +1,73 @@
+name: PASI Project #5 Roadmap UI verification
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_run:
+    workflows:
+      - "PASI Project #5 reconciliation"
+    types:
+      - completed
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pasi-project-5-roadmap-ui
+  cancel-in-progress: false
+
+jobs:
+  roadmap-ui:
+    name: Verify Project #5 Roadmap UI
+    if: >
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out canonical PASI
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Verify browser-check credentials are configured
+        env:
+          PASI_GITHUB_USERNAME: ${{ secrets.PASI_GITHUB_USERNAME }}
+          PASI_GITHUB_PASSWORD: ${{ secrets.PASI_GITHUB_PASSWORD }}
+          PASI_GITHUB_TOTP_SECRET: ${{ secrets.PASI_GITHUB_TOTP_SECRET }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${PASI_GITHUB_USERNAME}" || -z "${PASI_GITHUB_PASSWORD}" ]]; then
+            echo "::error::Repository secrets PASI_GITHUB_USERNAME and PASI_GITHUB_PASSWORD are required for the authenticated Project #5 Roadmap UI check."
+            exit 1
+          fi
+
+          if [[ -z "${PASI_GITHUB_TOTP_SECRET}" ]]; then
+            echo "::error::Repository secret PASI_GITHUB_TOTP_SECRET is required because the browser check must complete GitHub 2FA non-interactively. Use a dedicated test account with TOTP."
+            exit 1
+          fi
+
+      - name: Install Chromium
+        run: npx --yes playwright@1.63.0 install --with-deps chromium
+
+      - name: Verify Project #5 Roadmap Date fields
+        env:
+          PASI_GITHUB_USERNAME: ${{ secrets.PASI_GITHUB_USERNAME }}
+          PASI_GITHUB_PASSWORD: ${{ secrets.PASI_GITHUB_PASSWORD }}
+          PASI_GITHUB_TOTP_SECRET: ${{ secrets.PASI_GITHUB_TOTP_SECRET }}
+        run: |
+          set -euo pipefail
+
+          npx --yes playwright@1.63.0 test \
+            scripts/validate_project5_roadmap_ui.spec.mjs \
+            --reporter=line \
+            --workers=1 \
+            --retries=0
