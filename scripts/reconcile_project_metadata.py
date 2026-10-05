@@ -395,6 +395,28 @@ def set_project_value(project_id: str, item_id: str, field_id: str, value: dict[
     })
 
 
+VIEW_UPDATE = """
+mutation UpdateView($viewId: ID!, $layout: ProjectV2ViewLayout, $name: String) {
+  updateProjectV2View(input: {viewId: $viewId, layout: $layout, name: $name}) {
+    projectV2View { id name layout }
+  }
+}
+"""
+
+
+def configure_roadmap_view() -> None:
+    p = project()
+    views = p.get("views") or []
+    if not views:
+        raise Error("Project #5 has no view")
+    view = next((v for v in views if int(v.get("number", -1)) == 1), views[0])
+    view_id = str(view["id"])
+    # Reapplying roadmap after fields exist makes GitHub re-evaluate the date/iteration fields.
+    graphql(VIEW_UPDATE, {"viewId": view_id, "layout": "TABLE_LAYOUT", "name": "PASI Roadmap"})
+    graphql(VIEW_UPDATE, {"viewId": view_id, "layout": "ROADMAP_LAYOUT", "name": "PASI Roadmap"})
+    print("Roadmap view configured: PASI Roadmap")
+
+
 def ensure_roadmap_label() -> None:
     labels = request_json(
         f"https://api.github.com/repos/{OWNER}/PASI/labels?per_page=100",
@@ -525,6 +547,7 @@ def reconcile(metadata: dict[int, dict[str, str]]) -> None:
         set_project_value(p["meta"]["id"], item["id"], iteration_field["id"], {"iterationId": iteration_id})
 
     add_issue_metadata(metadata)
+    configure_roadmap_view()
 
     final = project()
     final_keys = sorted(
