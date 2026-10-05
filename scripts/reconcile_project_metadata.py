@@ -109,18 +109,26 @@ def issue(number: int) -> dict[str, Any]:
 
 
 def parse_metadata(number: int, body: str) -> dict[str, str]:
-    match = ISSUE_META.search(body)
-    iteration = ITERATION.search(body)
-    if not match or not iteration:
-        raise Error(f"issue #{number} is missing roadmap metadata")
-    data = {k: v.strip() for k, v in match.groupdict().items()}
-    data["iteration"] = iteration.group(1).strip()
-    dt.date.fromisoformat(data["start"])
-    dt.date.fromisoformat(data["end"])
-    if data["end"] < data["start"]:
-        raise Error(f"issue #{number} has end date before start date")
-    return data
+    def value(name: str) -> str:
+        match = re.search(rf"(?m)^\\s*{re.escape(name)}:\\s*(.+?)\\s*$", body)
+        if not match:
+            raise Error(f"issue #{number} is missing roadmap metadata field {name}")
+        return match.group(1).strip()
 
+    meta = {
+        "start": value("START_DATE"),
+        "end": value("END_DATE"),
+        "team": value("TEAM"),
+        "quarter": value("QUARTER"),
+        "owner": value("OWNER"),
+        "iteration": value("ITERATION"),
+    }
+
+    dt.date.fromisoformat(meta["start"])
+    dt.date.fromisoformat(meta["end"])
+    if meta["end"] < meta["start"]:
+        raise Error(f"issue #{number} has end date before start date")
+    return meta
 
 def issue_metadata() -> dict[int, dict[str, str]]:
     result = {}
