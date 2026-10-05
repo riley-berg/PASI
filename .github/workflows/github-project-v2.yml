@@ -43,6 +43,7 @@ jobs:
       - name: Reconcile canonical Project #5
         env:
           PASI_PROJECTS_TOKEN: ${{ secrets.PASI_PROJECTS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
