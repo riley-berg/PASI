@@ -51,7 +51,15 @@ query Project($login: String!, $number: Int!) {
               __typename
               ... on ProjectV2ItemFieldDateValue {
                 date
-                field { name }
+                field {
+                  __typename
+                  ... on ProjectV2Field {
+                    name
+                  }
+                  ... on ProjectV2IterationField {
+                    name
+                  }
+                }
               }
             }
           }
