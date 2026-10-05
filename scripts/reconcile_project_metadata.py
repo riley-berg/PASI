@@ -135,7 +135,7 @@ def issue_metadata() -> dict[int, dict[str, str]]:
     for number in ISSUES:
         item = issue(number)
         body = item.get("body") or ""
-        if number == 1 and not ISSUE_META.search(body):
+        if number == 1:
             meta = {
                 "start": "2026-10-05",
                 "end": "2027-11-14",
