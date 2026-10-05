@@ -134,7 +134,7 @@ def issue_metadata() -> dict[int, dict[str, str]]:
                 "team": "Program",
                 "quarter": "Q4-2026",
                 "owner": OWNER,
-                "iteration": "Program Roadmap",
+                "iteration": "Iteration 1",
             }
         else:
             meta = parse_metadata(number, body)
@@ -290,7 +290,7 @@ def ensure_iteration_field(metadata: dict[int, dict[str, str]]) -> dict[str, Any
                 for x in ((field.get("configuration") or {}).get("iterations") or [])
             ]
             desired = []
-            for number in ISSUES:
+            for number in range(19, 36):
                 m = metadata[number]
                 start = dt.date.fromisoformat(m["start"])
                 end = dt.date.fromisoformat(m["end"])
@@ -329,7 +329,7 @@ def ensure_iteration_field(metadata: dict[int, dict[str, str]]) -> dict[str, Any
 
     p = project()
     desired = []
-    for number in ISSUES:
+    for number in range(19, 36):
         m = metadata[number]
         start = dt.date.fromisoformat(m["start"])
         end = dt.date.fromisoformat(m["end"])
