@@ -1,7 +1,14 @@
-name: Educational Roadmap Project #6 sync
+name: "Educational Roadmap Project #6 sync"
 
 on:
+  issues:
+    types: [opened, reopened, labeled]
   workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Existing PASI issue number with the roadmap label"
+        required: true
+        type: number
   push:
     branches: [main]
     paths:
@@ -10,6 +17,7 @@ on:
 
 permissions:
   contents: read
+  issues: read
 
 concurrency:
   group: educational-roadmap-project6-item-sync
@@ -28,7 +36,8 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - name: Add issue #48 and assign project group/team fields
+      - name: Add roadmap issue and assign metadata
         env:
           PASI_PROJECTS_TOKEN: ${{ secrets.PASI_PROJECTS_TOKEN }}
+          ROADMAP_ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number || 48 }}
         run: python scripts/add_educational_roadmap_project_item.py
