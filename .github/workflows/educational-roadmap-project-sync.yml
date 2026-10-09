@@ -1,0 +1,34 @@
+name: Educational Roadmap Project #6 sync
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/educational-roadmap-project-sync.yml"
+      - "scripts/add_educational_roadmap_project_item.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: educational-roadmap-project6-item-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out PASI
+        uses: actions/checkout@v7
+        with:
+          ref: main
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Add issue #48 and assign project group/team fields
+        env:
+          PASI_PROJECTS_TOKEN: ${{ secrets.PASI_PROJECTS_TOKEN }}
+        run: python scripts/add_educational_roadmap_project_item.py
